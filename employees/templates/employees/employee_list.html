@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Employee List</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f4f7fb;
+            color: #222;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1, h2 {
+            color: #173b35;
+        }
+
+        a, button {
+            display: inline-block;
+            padding: 9px 13px;
+            margin: 4px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .add, button {
+            background: #16785f;
+            color: white;
+        }
+
+        .secondary {
+            background: #e5e7eb;
+            color: #222;
+        }
+
+        form.filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 230px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #173b35;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f0f7f4;
+        }
+
+        .delete {
+            color: #b91c1c;
+        }
+
+        .summary {
+            margin-top: 20px;
+            color: #555;
+        }
+
+        .pagination {
+            margin-top: 22px;
+            text-align: center;
+        }
+
+        .pagination a {
+            background: #16785f;
+            color: white;
+        }
+
+        .pagination .current {
+            display: inline-block;
+            padding: 9px 13px;
+            margin: 4px;
+            background: #e5e7eb;
+            border-radius: 5px;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 20px;
+        }
+
+        @media (max-width: 700px) {
+            body {
+                margin: 12px;
+            }
+
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 850px;
+            }
+
+            input {
+                width: auto;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <h1>Employee Management</h1>
+
+    <a class="secondary" href="{% url 'employees:dashboard' %}">
+        Dashboard
+    </a>
+
+    <a class="add" href="{% url 'employees:employee_create' %}">
+        + Add Employee
+    </a>
+
+    <a class="secondary" href="{% url 'employees:department_list' %}">
+        Departments
+    </a>
+
+    <h2>Employee List</h2>
+
+    <!-- Search and Filters -->
+    <form class="filters" method="get">
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Search name or email"
+            value="{{ search }}"
+        >
+
+        <select name="status">
+            <option value="">All Statuses</option>
+
+            {% for value, label in status_choices %}
+                <option
+                    value="{{ value }}"
+                    {% if selected_status == value %}selected{% endif %}
+                >
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="department">
+            <option value="">All Departments</option>
+
+            {% for department in departments %}
+                <option
+                    value="{{ department.id }}"
+                    {% if selected_department == department.id|stringformat:"s" %}selected{% endif %}
+                >
+                    {{ department.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Apply Filters</button>
+
+        <a
+            class="secondary"
+            href="{% url 'employees:employee_list' %}"
+        >
+            Clear Filters
+        </a>
+
+    </form>
+
+    <p class="summary">
+        Total matching employees: {{ page_obj.paginator.count }}
+    </p>
+
+    <!-- Employee Table -->
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Designation</th>
+                    <th>Salary</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for employee in employees %}
+                <tr>
+                    <td>{{ employee.id }}</td>
+                    <td>{{ employee.full_name }}</td>
+                    <td>{{ employee.email }}</td>
+                    <td>{{ employee.department.name }}</td>
+                    <td>{{ employee.designation }}</td>
+                    <td>{{ employee.salary }}</td>
+                    <td>{{ employee.status }}</td>
+                    <td>
+                        <a href="{% url 'employees:employee_update' employee.pk %}">
+                            Edit
+                        </a>
+
+                        <a
+                            class="delete"
+                            href="{% url 'employees:employee_delete' employee.pk %}"
+                        >
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8" class="empty">
+                        No employees found.
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination">
+
+            {% if page_obj.has_previous %}
+                <a href="?{% if search %}search={{ search|urlencode }}&amp;{% endif %}{% if selected_status %}status={{ selected_status|urlencode }}&amp;{% endif %}{% if selected_department %}department={{ selected_department|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }}
+                of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?{% if search %}search={{ search|urlencode }}&amp;{% endif %}{% if selected_status %}status={{ selected_status|urlencode }}&amp;{% endif %}{% if selected_department %}department={{ selected_department|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+            {% endif %}
+
+        </div>
+    {% endif %}
+
+</div>
+</body>
+</html>

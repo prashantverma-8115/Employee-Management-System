@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 30px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        button, a {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 12px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        button {
+            background: #16785f;
+            color: white;
+            border: 0;
+            cursor: pointer;
+        }
+        .errors { color: #b91c1c; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>{{ page_title }}</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        {% for field in form %}
+            <p>
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.errors %}
+                    <div class="errors">{{ field.errors }}</div>
+                {% endif %}
+            </p>
+        {% endfor %}
+
+        <button type="submit">Save Department</button>
+        <a href="{% url 'employees:department_list' %}">Cancel</a>
+    </form>
+</div>
+</body>
+</html>

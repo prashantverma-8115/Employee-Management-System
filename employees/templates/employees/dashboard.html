@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        header {
+            background: #173b35;
+            color: white;
+            padding: 22px 6%;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+        }
+
+        .card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0000000a;
+        }
+
+        .number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #16785f;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            margin-top: 25px;
+        }
+
+        
+        header form {
+    margin-top: 15px;
+}
+
+header button {
+    background: white;
+    color: #173b35;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+header button:hover {
+    background: #e5e7eb;
+}
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Employee Management System</h1>
+        <p>Welcome, {{ request.user.username }}</p>
+        <form method="post" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+    </header>
+
+    <main>
+        <h2>Dashboard</h2>
+
+        <div class="cards">
+            <div class="card">
+                <p>Total Employees</p>
+                <div class="number">{{ total_employees }}</div>
+            </div>
+
+            <div class="card">
+                <p>Total Departments</p>
+                <div class="number">{{ total_departments }}</div>
+            </div>
+
+            <div class="card">
+                <p>Active Employees</p>
+                <div class="number">{{ active_employees }}</div>
+            </div>
+        </div>
+
+        <h2>Recently Added Employees</h2>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Designation</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for employee in recent_employees %}
+                    <tr>
+                        <td>{{ employee.full_name }}</td>
+                        <td>{{ employee.email }}</td>
+                        <td>{{ employee.department.name }}</td>
+                        <td>{{ employee.designation }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">
+                            No employees added yet.
+                            Add an employee from Django Admin.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p>
+             <a href="{% url 'employees:employee_list' %}">
+        Manage Employees
+    </a>  
+        </p>
+        <p>
+    <a href="{% url 'employees:department_list' %}">
+        Manage Departments
+    </a>
+</p>
+    </main>
+</body>
+</html>

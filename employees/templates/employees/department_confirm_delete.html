@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Delete Department</title>
+</head>
+<body>
+    <h1>Delete Department</h1>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <p>
+        Kya aap department
+        <strong>{{ department.name }}</strong>
+        delete karna chahte hain?
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Yes, Delete</button>
+    </form>
+
+    <a href="{% url 'employees:department_list' %}">Cancel</a>
+</body>
+</html>
